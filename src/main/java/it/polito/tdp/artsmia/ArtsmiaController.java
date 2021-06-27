@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 public class ArtsmiaController {
 	
 	private Model model ;
+	private boolean grafoCreato = false;
 
     @FXML
     private ResourceBundle resources;
@@ -31,7 +32,7 @@ public class ArtsmiaController {
     private Button btnCalcolaPercorso;
 
     @FXML
-    private ComboBox<?> boxRuolo;
+    private ComboBox<String> boxRuolo;
 
     @FXML
     private TextField txtArtista;
@@ -42,23 +43,51 @@ public class ArtsmiaController {
     @FXML
     void doArtistiConnessi(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Calcola artisti connessi");
+    	if(!this.grafoCreato) {
+    		this.txtResult.appendText("Necessario creare il grafo prima di procedere\n");
+    		return;
+    	}
+    	this.txtResult.appendText(this.model.getArtistiConnessi());
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Calcola percorso");
+    	if(!this.grafoCreato) {
+    		this.txtResult.appendText("Necessario creare il grafo prima di procedere\n");
+    		return;
+    	}
+    	if(this.txtArtista.getText().equals("")) {
+    		this.txtResult.appendText("Selezionare l'ID\n");
+    		return;
+    	}
+    	int artist_id = 0;
+    	try {
+    		artist_id = Integer.parseInt(this.txtArtista.getText());
+    	}catch (NumberFormatException e) {
+    		this.txtResult.appendText("L'identificativo deve essere un intero positivo\n");
+    		return;
+    	}
+    	this.txtResult.appendText(this.model.calcolaPercorso(artist_id));
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Crea grafo");
+    	String ruolo = this.boxRuolo.getValue();
+    	if(ruolo == null) {
+    		this.txtResult.appendText("Selezionare un ruolo\n");
+    		return;
+    	}
+    	this.model.creaGrafo(ruolo);
+    	this.grafoCreato = true;
+    	this.txtResult.appendText("Grafo creato!\nVertici: "+this.model.getNumVertici()+"\nArchi: "+this.model.getNumEdges()+"\n");
+    	
     }
 
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxRuolo.getItems().addAll(this.model.getAllRoles());
     }
 
     
